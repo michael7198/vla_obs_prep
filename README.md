@@ -3,12 +3,13 @@
 This repo contains code I've used to assist in prepping observations with the VLA. 
 
 
-find_vla_calibrators.py can be used to point to a target list (ideally everything in a planned schedule block) and find potential complex gain calibrators for the targets of interest. By default it will also output an 'optimised' list of the minimum amount of calibrators that can be used which may be helpful when there are a large number of targets in the same area of the sky that can use the same calibrator. Run as:
+_find_vla_calibrators.py_ can be used to point to a target list (ideally everything in a planned schedule block) and find potential complex gain calibrators for the targets of interest. By default it will also output an 'optimised' list of the minimum amount of calibrators that can be used which may be helpful when there are a large number of targets in the same area of the sky that can use the same calibrator. Run as:
 
     >python find_vla_calibrators.py targets
 
 where *targets* is the filename of the list of targets including columns for object name, ra and dec. There are also a number of optional arguments that can be called.
 
+_VLA_calibrator_list.txt_ is a text file containing the list of complex gain calibrators for the VLA, in the same format as at https://science.nrao.edu/facilities/vla/observing/callist
 
 <br/>
 

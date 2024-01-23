@@ -257,7 +257,7 @@ def parse_args():
                         type=str, default='DEC',
                         help="Decl. column name in targets")
     parser.add_argument("--calibrators", action='store',
-                        type=str, default='VLA_collaborator_list.txt',
+                        type=str, default='VLA_colibrator_list.txt',
                         help="text file of VLA calibrators from https://science.nrao.edu/facilities/vla/observing/callist")
     parser.add_argument("--band", action='store',
                         type=str, default='L',
