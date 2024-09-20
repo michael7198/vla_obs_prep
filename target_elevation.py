@@ -88,16 +88,26 @@ def plot_alt_v_time(time, elevation, label=None,
     'plot time vs elevation plot'
     
     ###link time and elevation in table and sort so no wrapping on plot
-    ttab = Table({'time': time, 'alt': elevation})
-    ttab.sort('time')
-    time = np.array(ttab['time'])
-    elevation = np.array(ttab['alt'])
+
     
     plt.figure(figsize=figsize)
     for i in range(len(warnx)):
         plt.fill_between(warnx[i], warny[i][0], warny[i][1],
                          color=warncolors[i], alpha=warnalpha)
-    plt.plot(time, elevation, c=lincol, lw=lw, ls=ls)
+    if args.multiplot:
+        for i in range(len(time)):
+            ttab = Table({'time': time[i], 'alt': elevation[i]})
+            ttab.sort('time')
+            time2 = np.array(ttab['time'])
+            elevation2 = np.array(ttab['alt'])
+            plt.plot(time2, elevation2, lw=lw, ls=ls, label=label[i].split('on')[0].strip())
+        plt.legend()
+    else:
+        ttab = Table({'time': time, 'alt': elevation})
+        ttab.sort('time')
+        time = np.array(ttab['time'])
+        elevation = np.array(ttab['alt'])
+        plt.plot(time, elevation, c=lincol, lw=lw, ls=ls)
     plt.xlim(0, 24)
     plt.ylim(0, 90)
     plt.xlabel(xlab, fontsize=fontsize)
@@ -108,7 +118,8 @@ def plot_alt_v_time(time, elevation, label=None,
     if plot_grid==True:
         plt.grid(ls=':')
         
-    plt.title(label, fontsize=fontsize+2)
+    if not args.multiplot:
+        plt.title(label, fontsize=fontsize+2)
     
     return
 
@@ -139,6 +150,7 @@ def parse_args():
     parser.add_argument("--use_old_IERS", action='store',
                         type=str, default='False',
                         help="use old IERS predictions if IERS server down")
+    parser.add_argument("--multiplot", action='store', type=str, default='False', help='plot all targets on one graph?')
     
     args = parser.parse_args()
     
@@ -146,7 +158,7 @@ def parse_args():
     args.obsloc = EarthLocation.of_site(args.obsloc)
     args.use_old_IERS = bool(strtobool(args.use_old_IERS))
     args.outdir = args.outdir.removesuffix('/')
-    
+    args.multiplot = bool(strtobool(args.multiplot))
     return args
 
 
@@ -165,16 +177,26 @@ if __name__ == '__main__':
     if args.use_old_IERS == True:
         conf.auto_max_age = None
     ###iterate through targets
+    lst_list = []
+    elevs_list = []
+    plot_label = []
     for tname in list(targets.keys()):
         pos = targets[tname]
-        plot_label = f'{tname}  on  {args.obsdate}'
         times = make_time_list(location=args.obsloc,
                                date=args.obsdate)
-        lst_list = [lst_from_utc(obstime=t).value for t in times]
-        elevs_list = [elevation_from_time(coord=pos, obstime=t).value for t in times]
+        lst_list.append([lst_from_utc(obstime=t).value for t in times])
+        elevs_list.append([elevation_from_time(coord=pos, obstime=t).value for t in times])
+        plot_label.append(f'{tname}  on  {args.obsdate}')
+    if args.multiplot:
         plot_alt_v_time(time=lst_list, elevation=elevs_list,
                         label=plot_label)
-        plt.savefig(f'{args.outdir}/lst_v_alt_{tname}.png', dpi=100)
+        plt.savefig(f'{args.outdir}/lst_v_alt_all.png', dpi=100)
         plt.close()
+    else:
+        for ind, tname in enumerate(list(targets.keys())):
+            plot_alt_v_time(time=lst_list[ind], elevation=elevs_list[ind],
+                        label=plot_label[ind])
+            plt.savefig(f'{args.outdir}/lst_v_alt_{tname}.png', dpi=100)
+            plt.close()
 
 
